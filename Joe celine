@@ -1,0 +1,60 @@
+name: JOE Celine monitor
+
+on:
+  schedule:
+    - cron: '2,7,12,17,22,27,32,37,42,47,52,57 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check-joe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check JOE playlist
+        env:
+          HOOKTAP_URL: ${{ secrets.HOOKTAP_WEBHOOK_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import requests
+
+          url = "https://www.radiozenders.fm/joe-nl"
+
+          response = requests.get(
+              url,
+              headers={
+                  "User-Agent": "Mozilla/5.0"
+              },
+              timeout=20
+          )
+
+          response.raise_for_status()
+
+          html = response.text
+
+          # Zoek naar Céline Dion in de actuele playlist.
+          match = re.search(
+              r'C[ÉE]LINE\s+DION',
+              html,
+              re.IGNORECASE
+          )
+
+          if match:
+              print("CELINE GEVONDEN!")
+
+              hooktap = os.environ["HOOKTAP_URL"]
+
+              requests.post(
+                  hooktap,
+                  json={
+                      "type": "push",
+                      "title": "🚨 CÉLINE DION!",
+                      "body": "Céline Dion staat in de JOE-playlist. Open NU de JOE-app!",
+                  },
+                  timeout=20
+              ).raise_for_status()
+
+          else:
+              print("Geen Céline Dion gevonden.")
+          PY
