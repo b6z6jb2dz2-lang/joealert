@@ -23,19 +23,15 @@ jobs:
 
           response = requests.get(
               url,
-              headers={
-                  "User-Agent": "Mozilla/5.0"
-              },
+              headers={"User-Agent": "Mozilla/5.0"},
               timeout=20
           )
 
           response.raise_for_status()
-
           html = response.text
 
-          # Zoek naar Céline Dion in de actuele playlist.
           match = re.search(
-              r'C[ÉE]LINE\s+DION',
+              r"C[ÉE]LINE\s+DION",
               html,
               re.IGNORECASE
           )
@@ -50,7 +46,7 @@ jobs:
                   json={
                       "type": "push",
                       "title": "🚨 CÉLINE DION!",
-                      "body": "Céline Dion staat in de JOE-playlist. Open NU de JOE-app!",
+                      "body": "Céline Dion staat in de JOE-playlist. Open NU de JOE-app!"
                   },
                   timeout=20
               ).raise_for_status()
