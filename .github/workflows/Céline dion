@@ -1,45 +1,35 @@
-steps:
-  - name: Check JOE playlist
-    env:
-      HOOKTAP_URL: ${{ secrets.HOOKTAP_WEBHOOK_URL }}
-    run: |
-      python - <<'PY'
-      import os
-      import re
-      import requests
+name: JOE Celine monitor
 
-      url = "https://www.radiozenders.fm/joe-nl"
+on:
+  workflow_dispatch:
 
-      response = requests.get(
-          url,
-          headers={"User-Agent": "Mozilla/5.0"},
-          timeout=20
-      )
+jobs:
+  test-hooktap:
+    runs-on: ubuntu-latest
 
-      response.raise_for_status()
-      html = response.text
-
-      match = re.search(
-          r"C[ÉE]LINE\s+DION",
-          html,
-          re.IGNORECASE
-      )
-
-      if match:
-          print("CELINE GEVONDEN!")
+    steps:
+      - name: Test HookTap
+        env:
+          HOOKTAP_URL: ${{ secrets.HOOKTAP_WEBHOOK_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          import requests
 
           hooktap = os.environ["HOOKTAP_URL"]
 
-          requests.post(
+          response = requests.post(
               hooktap,
               json={
                   "type": "push",
-                  "title": "🚨 CÉLINE DION!",
-                  "body": "Céline Dion staat in de JOE-playlist. Open NU de JOE-app!"
+                  "title": "✅ TEST GELUKT!",
+                  "body": "GitHub is succesvol verbonden met HookTap. De JOE-monitor kan worden ingesteld."
               },
               timeout=20
-          ).raise_for_status()
+          )
 
-      else:
-          print("Geen Céline Dion gevonden.")
-      PY
+          print("Status:", response.status_code)
+          print("Antwoord:", response.text)
+
+          response.raise_for_status()
+          PY
